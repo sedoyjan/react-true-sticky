@@ -3,136 +3,114 @@ import styles from './styles.scss'
 
 class TrueStickyContainer extends PureComponent {
 
-    state = {
-        isReady: false,
-        isSticky: false
-    }
-
-    container = null
-    sticky = null
-
-    scrollContainer = null
-    initialContainerHeight = 0
-    initialStickyHeight = 0
+    stickyRefMap = {}
+    stickyCloneRefMap = {}
+    refMap = {}
 
     componentDidMount() {
-
+        window.addEventListener('resize', this.onSmthChanged)
     }
+
 
     componentWillUnmount() {
-        this.container.removeEventListener('scroll', this.onSmthChanged)
+        window.removeEventListener('resize', this.onSmthChanged)
+        if (this.refMap['content']) {
+            this.refMap['content'].removeEventListener('scroll', this.onSmthChanged)
+        }
     }
 
-    setContainer = (ref) => {
-        if (ref) {
-            this.container = ref
-            this.initialContainerHeight = this.container.getBoundingClientRect().height
-            if (!this.state.isReady) {
-                this.setListeners()
-                this.setState({ isReady: true })
+
+    setRef = (id, clb) => (r) => {
+        if (r) {
+            this.refMap[id] = r
+            if (clb) {
+                clb(r)
             }
         }
     }
 
-    setStickyRef = (ref) => {
-        if (ref) {
-            this.sticky = ref
-            this.initialStickyHeight = this.container.getBoundingClientRect().height
+    setListeners = (content) => {
+        content.addEventListener('scroll', this.onSmthChanged)
+    }
+
+    onSmthChanged = () => {
+        const content = this.refMap['content']
+        const bucket = this.refMap['bucket']
+
+        for (const key in this.stickyRefMap) {
+            const sticky = this.stickyRefMap[key]
+            const stickyClone = this.stickyCloneRefMap[key]
+            const stickyTop = stickyClone.offsetHeight + sticky.offsetTop
+            let top = content.scrollTop - sticky.offsetTop
+            if (top > stickyClone.offsetHeight) {
+                top = stickyClone.offsetHeight
+            }
+            if (top < 0) {
+                top = 0
+            }
+
+            if (top > 0) {
+                sticky.style.height = `${stickyClone.offsetHeight - (top / 2)}px`
+            }
+
+            content.style.top = `${top}px`
+            bucket.style.height = `${top}px`
         }
     }
 
-    setOthersRef = (ref) => {
-        if (ref) {
-            this.other = ref
-            this.otherHeight = this.other.getBoundingClientRect().height
-            console.log(this.otherHeight)
-        }
+    renderItems = () => {
+        return React.Children.map(this.props.children, (item) => {
+            if (item.type.name === 'TrueSticky') {
+                return (
+                    <div ref={r => {
+                        if (r) {
+                            this.stickyRefMap[item.props.id] = r
+                        }
+                    }}>
+                        {item}
+                    </div>
+                )
+            } else {
+                return item
+            }
+        })
     }
 
-    setListeners = () => {
-        this.container.addEventListener('scroll', this.onSmthChanged)
-    }
-
-    onSmthChanged = (e) => {
-        const stickyTop = this.sticky ? this.sticky.getBoundingClientRect().top : 0
-        const containerTop = this.container ? this.container.getBoundingClientRect().top : 0
-        const isSticky = containerTop - stickyTop
-        if (this.state.isSticky !== isSticky) {
-            this.setState({ isSticky: isSticky })
-        }
-        if (this.other) {
-            this.other.scrollTop = e.target.scrollTop
-        }
-    }
-
-    renderChildren(sticky, otherItems) {
-        return (
-            <Fragment>
-                <div ref={this.setStickyRef}>{sticky}</div>
-                <div
-                    ref={this.setOthersRef}
-                    className={styles.scrollChildren}
-                    style={{
-                        overflow: 'auto',
-                        height: this.initialContainerHeight - 80
-                    }}
-                >{otherItems}</div>
-            </Fragment>
-        )
+    renderSticky = () => {
+        const sticky = []
+        React.Children.map(this.props.children, (item) => {
+            if (item.type.name === 'TrueSticky') {
+                sticky.push(
+                    <div
+                        key={`Clone${item.props.id}`}
+                        ref={r => {
+                            if (r) {
+                                this.stickyCloneRefMap[item.props.id] = r
+                            }
+                        }}
+                    >
+                        {item}
+                    </div>
+                )
+            }
+        })
+        return sticky
     }
 
     render() {
-        let sticky = undefined
-        const otherItems = []
-        React.Children.map(this.props.children, (item) => {
-            if (item.type.name === 'TrueSticky') {
-                let propsToPass = { ...item.props }
-                propsToPass.isSticky = this.state.isSticky
-                sticky = React.cloneElement(item, propsToPass)
-            } else {
-                otherItems.push(item)
-            }
-        })
-
         const className = this.props.className ? this.props.className : ''
-        const containerStyles = {
-            position: 'fixed'
-        }
-        return (
-            <div
-                style={{ position: 'relative' }}
-                className={className}
-                ref={this.setContainer}
-            >
 
-                <div style={{
-                    position: 'fixed',
-                    top: '80px',
-                    left: '50%',
-                    width: '768px',
-                    marginLeft: '-384px',
-                    zIndex: -1,
-                    height: this.initialContainerHeight
-                }}>
-                    {this.state.isReady ? this.renderChildren(sticky, otherItems) : null}
+        return (
+            <div className={`${className} ${styles.wrapper}`} ref={this.setRef('wrapper')}>
+                <div className={styles.stickyBucket} ref={this.setRef('bucket')}>
+                    {this.renderSticky()}
                 </div>
-                <div style={{
-                    width: 0,
-                    height: 880,
-                }}></div>
+                <div className={styles.content} ref={this.setRef('content', this.setListeners)}>
+                    {this.renderItems()}
+                </div>
             </div >
         )
     }
 }
 
 export default TrueStickyContainer
-
-
-// #fixedContainer {
-//     position: fixed;
-//     width: 600px;
-//     height: 200px;
-//     left: 50%;
-//     top: 0%;
-//     margin-left: -300px; /*half the width*/
-//   }

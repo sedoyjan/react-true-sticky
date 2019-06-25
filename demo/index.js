@@ -13,7 +13,8 @@ class Demo extends PureComponent {
         const liArr = []
         for (let index = 0; index < 10; index++) {
             liArr.push(
-                <li style={{ backgroundColor: `rgba(255,0,0,${0.1 * (index + 1)})` }} key={`Item ${index}`}>{`Item ${index}`}</li>
+                // <li style={{ backgroundColor: `rgba(255,0,0,${0.1 * (index + 1)})` }} key={`Item ${index}`}>{`Item ${index}`}</li>
+                <li key={`Item ${index}`}>{`Item ${index}`}</li>
             )
         }
 
@@ -29,9 +30,12 @@ class Demo extends PureComponent {
             <div className={styles.wrapper}>
                 <h1 className={styles.title}>react-true-sticky</h1>
                 <TrueStickyContainer className={styles.demo}>
-                    <TrueSticky>
-                        <li>Sticky
-                            <button>Click</button>
+                    <div className={styles.topSpacer}>
+                        <h1>Spacer</h1>
+                    </div>
+                    <TrueSticky id={'header'}>
+                        <li style={{ backgroundColor: 'rgba(255,255,255,0.1)' }}>
+                            Sticky
                         </li>
                     </TrueSticky>
                     {this.renderList()}
