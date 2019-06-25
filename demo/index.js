@@ -13,7 +13,6 @@ class Demo extends PureComponent {
         const liArr = []
         for (let index = 0; index < 10; index++) {
             liArr.push(
-                // <li style={{ backgroundColor: `rgba(255,0,0,${0.1 * (index + 1)})` }} key={`Item ${index}`}>{`Item ${index}`}</li>
                 <li key={`Item ${index}`}>{`Item ${index}`}</li>
             )
         }

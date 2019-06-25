@@ -6,6 +6,7 @@ class TrueStickyContainer extends PureComponent {
     stickyRefMap = {}
     stickyCloneRefMap = {}
     refMap = {}
+    isSticky = false
 
     componentDidMount() {
         window.addEventListener('resize', this.onSmthChanged)
@@ -49,8 +50,17 @@ class TrueStickyContainer extends PureComponent {
                 top = 0
             }
 
-            if (top > 0) {
+            if (top >= 0) {
                 sticky.style.height = `${stickyClone.offsetHeight - (top / 2)}px`
+            }
+
+            if (top === stickyClone.offsetHeight && !this.isSticky) {
+                this.isSticky = true
+                console.log('sticky')
+            }
+            if (top === 0 && this.isSticky) {
+                this.isSticky = false
+                console.log('not sticky')
             }
 
             content.style.top = `${top}px`
@@ -108,7 +118,7 @@ class TrueStickyContainer extends PureComponent {
                 <div className={styles.content} ref={this.setRef('content', this.setListeners)}>
                     {this.renderItems()}
                 </div>
-            </div >
+            </div>
         )
     }
 }
