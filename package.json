@@ -1,0 +1,11 @@
+{
+  "name": "react-true-sticky",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/sedoyjan/react-true-sticky.git",
+  "author": "Сергей Григорьев <sedoyjan@live.com>",
+  "license": "MIT",
+  "dependencies": {
+    "react": "^16.8.6"
+  }
+}
