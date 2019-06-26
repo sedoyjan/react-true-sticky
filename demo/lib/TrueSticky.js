@@ -1,12 +1,12 @@
-import React, { PureComponent } from 'react'
+import React, { PureComponent, Fragment } from 'react'
 
 class TrueSticky extends PureComponent {
 
     render() {
         return (
-            <div>
+            <Fragment>
                 {this.props.children}
-            </div>
+            </Fragment>
         )
     }
 }

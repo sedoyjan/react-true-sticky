@@ -1,5 +1,29 @@
 import React, { PureComponent, Fragment } from 'react'
-import styles from './styles.scss'
+
+const contentStyles = {
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+    left: 0,
+    top: 0,
+    overflow: 'auto',
+}
+
+const wrapperStyles = {
+    position: 'relative',
+    overflow: 'hidden',
+}
+
+const bucketStyles = {
+    position: 'absolute',
+    right: 0,
+    left: 0,
+    top: 0,
+    height: 0,
+    overflow: 'hidden',
+}
+
+hideScrollbar()
 
 class TrueStickyContainer extends PureComponent {
 
@@ -111,11 +135,11 @@ class TrueStickyContainer extends PureComponent {
         const className = this.props.className ? this.props.className : ''
 
         return (
-            <div className={`${className} ${styles.wrapper}`} ref={this.setRef('wrapper')}>
-                <div className={styles.stickyBucket} ref={this.setRef('bucket')}>
+            <div className={`${className}`} style={wrapperStyles} ref={this.setRef('wrapper')}>
+                <div style={bucketStyles} ref={this.setRef('bucket')}>
                     {this.renderSticky()}
                 </div>
-                <div className={styles.content} ref={this.setRef('content', this.setListeners)}>
+                <div style={contentStyles} className={'no-scrollbar'} ref={this.setRef('content', this.setListeners)}>
                     {this.renderItems()}
                 </div>
             </div>
@@ -124,3 +148,16 @@ class TrueStickyContainer extends PureComponent {
 }
 
 export default TrueStickyContainer
+
+function hideScrollbar() {
+    var css = '.no-scrollbar::-webkit-scrollbar {width: 0;}.no-scrollbar {-ms-overflow-style: none;}.no-scrollbar {overflow: -moz-scrollbars-none;}'
+    var style = document.createElement('style')
+
+    if (style.styleSheet) {
+        style.styleSheet.cssText = css
+    } else {
+        style.appendChild(document.createTextNode(css))
+    }
+
+    document.getElementsByTagName('head')[0].appendChild(style)
+}

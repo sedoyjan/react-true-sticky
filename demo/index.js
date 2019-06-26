@@ -4,7 +4,7 @@ import styles from './index.scss'
 import {
     TrueSticky,
     TrueStickyContainer
-} from './lib'
+} from '../lib'
 
 class Demo extends PureComponent {
 
