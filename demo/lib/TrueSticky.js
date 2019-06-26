@@ -1,6 +1,7 @@
 import React, { PureComponent } from 'react'
 
 class TrueSticky extends PureComponent {
+
     render() {
         return (
             <div>
@@ -8,6 +9,10 @@ class TrueSticky extends PureComponent {
             </div>
         )
     }
+}
+
+TrueSticky.defaultProps = {
+    isSticky: true
 }
 
 export default TrueSticky

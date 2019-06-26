@@ -35,6 +35,7 @@ class TrueStickyContainer extends PureComponent {
     }
 
     onSmthChanged = () => {
+
         const content = this.refMap['content']
         const bucket = this.refMap['bucket']
 
@@ -54,13 +55,12 @@ class TrueStickyContainer extends PureComponent {
                 sticky.style.height = `${stickyClone.offsetHeight - (top / 2)}px`
             }
 
+
             if (top === stickyClone.offsetHeight && !this.isSticky) {
                 this.isSticky = true
-                console.log('sticky')
             }
             if (top === 0 && this.isSticky) {
                 this.isSticky = false
-                console.log('not sticky')
             }
 
             content.style.top = `${top}px`
@@ -70,7 +70,7 @@ class TrueStickyContainer extends PureComponent {
 
     renderItems = () => {
         return React.Children.map(this.props.children, (item) => {
-            if (item.type.name === 'TrueSticky') {
+            if (item.props.isSticky) {
                 return (
                     <div ref={r => {
                         if (r) {
@@ -89,7 +89,7 @@ class TrueStickyContainer extends PureComponent {
     renderSticky = () => {
         const sticky = []
         React.Children.map(this.props.children, (item) => {
-            if (item.type.name === 'TrueSticky') {
+            if (item.props.isSticky) {
                 sticky.push(
                     <div
                         key={`Clone${item.props.id}`}
