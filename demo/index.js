@@ -4,7 +4,7 @@ import styles from './index.scss'
 import {
     TrueSticky,
     TrueStickyContainer
-} from '../lib'
+} from './lib'
 
 class Demo extends PureComponent {
 
@@ -30,8 +30,8 @@ class Demo extends PureComponent {
                 <h1 className={styles.title}>react-true-sticky</h1>
                 <TrueStickyContainer className={styles.demo}>
                     <div className={styles.topSpacer}>
-                        <h1>Spacer</h1>
                     </div>
+                    <h3>some content over the sticky</h3>
                     <TrueSticky id={'header'}>
                         <li style={{ backgroundColor: 'rgba(255,255,255,0.1)' }}>
                             Sticky

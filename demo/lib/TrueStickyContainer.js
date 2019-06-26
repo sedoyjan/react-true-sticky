@@ -23,6 +23,19 @@ const bucketStyles = {
     overflow: 'hidden',
 }
 
+const scrollStyles = {
+    position: 'absolute',
+    right: 0,
+    top: 0,
+    bottom: 0,
+    width: '15px',
+    overflow: 'auto',
+    overflowX: 'hidden'
+}
+
+const scrollPlaceholder = {
+}
+
 hideScrollbar()
 
 class TrueStickyContainer extends PureComponent {
@@ -31,16 +44,34 @@ class TrueStickyContainer extends PureComponent {
     stickyCloneRefMap = {}
     refMap = {}
     isSticky = false
+    isMainScrolling = false
+
+    componentWillMount() {
+        setInterval(() => {
+            if (this.isMainScrolling) {
+                const now = Date.now()
+                const diff = now - this.isMainScrolling
+                if (diff > 200) {
+                    this.isMainScrolling = false
+                }
+            }
+        }, 100);
+    }
 
     componentDidMount() {
         window.addEventListener('resize', this.onSmthChanged)
+        window.addEventListener('resize', this.fakeScroll)
     }
 
 
     componentWillUnmount() {
         window.removeEventListener('resize', this.onSmthChanged)
+        window.addEventListener('resize', this.fakeScroll)
         if (this.refMap['content']) {
             this.refMap['content'].removeEventListener('scroll', this.onSmthChanged)
+        }
+        if (this.refMap['scroll']) {
+            this.refMap['scroll'].removeEventListener('scroll', this.fakeScroll)
         }
     }
 
@@ -58,10 +89,34 @@ class TrueStickyContainer extends PureComponent {
         content.addEventListener('scroll', this.onSmthChanged)
     }
 
+    setFakeScrollListeners = (scroll) => {
+        scroll.addEventListener('scroll', this.fakeScroll)
+        this.fakeScroll()
+    }
+
+    fakeScroll = () => {
+        const content = this.refMap['content']
+        const bucket = this.refMap['bucket']
+        const scrollPlaceholder = this.refMap['scrollPlaceholder']
+        const scroll = this.refMap['scroll']
+        scrollPlaceholder.style.height = `${content.scrollHeight}px`
+        if (!this.isMainScrolling) {
+            content.scrollTop = scroll.scrollTop
+        }
+    }
+
+    updateFakeScroll = () => {
+        const content = this.refMap['content']
+        const scroll = this.refMap['scroll']
+        this.isMainScrolling = Date.now()
+        scroll.scrollTop = content.scrollTop
+    }
+
     onSmthChanged = () => {
 
         const content = this.refMap['content']
         const bucket = this.refMap['bucket']
+        const scroll = this.refMap['scroll']
 
         for (const key in this.stickyRefMap) {
             const sticky = this.stickyRefMap[key]
@@ -90,17 +145,15 @@ class TrueStickyContainer extends PureComponent {
             content.style.top = `${top}px`
             bucket.style.height = `${top}px`
         }
+
+        this.updateFakeScroll()
     }
 
     renderItems = () => {
         return React.Children.map(this.props.children, (item) => {
             if (item.props.isSticky) {
                 return (
-                    <div ref={r => {
-                        if (r) {
-                            this.stickyRefMap[item.props.id] = r
-                        }
-                    }}>
+                    <div ref={r => { if (r) { this.stickyRefMap[item.props.id] = r } }}>
                         {item}
                     </div>
                 )
@@ -117,11 +170,7 @@ class TrueStickyContainer extends PureComponent {
                 sticky.push(
                     <div
                         key={`Clone${item.props.id}`}
-                        ref={r => {
-                            if (r) {
-                                this.stickyCloneRefMap[item.props.id] = r
-                            }
-                        }}
+                        ref={r => { if (r) { this.stickyCloneRefMap[item.props.id] = r } }}
                     >
                         {item}
                     </div>
@@ -141,6 +190,9 @@ class TrueStickyContainer extends PureComponent {
                 </div>
                 <div style={contentStyles} className={'no-scrollbar'} ref={this.setRef('content', this.setListeners)}>
                     {this.renderItems()}
+                </div>
+                <div style={scrollStyles} ref={this.setRef('scroll', this.setFakeScrollListeners)}>
+                    <div style={scrollPlaceholder} ref={this.setRef('scrollPlaceholder')} />
                 </div>
             </div>
         )
